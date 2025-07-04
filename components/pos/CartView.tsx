@@ -78,10 +78,10 @@ const CartView: React.FC = () => {
   
   return (
     <div className="h-full flex flex-col p-4 bg-transparent">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 border-b pb-2 border-pink-200">Shopping Cart</h2>
+      <h2 className="text-xl font-bold mb-4 text-gray-900 border-b pb-2 border-pink-200">Carrito de compras</h2>
       {cart.length === 0 ? (
         <div className="flex-grow flex items-center justify-center">
-          <p className="text-gray-500">Your cart is empty.</p>
+          <p className="text-gray-500">Tu carrito está vacío.</p>
         </div>
       ) : (
         <>
@@ -93,7 +93,7 @@ const CartView: React.FC = () => {
 
           <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
             <div className="flex justify-between items-center">
-                <span className="text-gray-600">Discount</span>
+                <span className="text-gray-600">Descuento</span>
                 <div className="flex items-center gap-2">
                     <input 
                         type="number" 
@@ -112,7 +112,7 @@ const CartView: React.FC = () => {
               <span>${subtotal.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-gray-600">
-              <span>Discount</span>
+              <span>Descuento</span>
               <span className="text-green-600">-${discountAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-xl font-bold text-gray-900">
@@ -123,14 +123,16 @@ const CartView: React.FC = () => {
                 <button
                     onClick={clearCart}
                     className="w-full py-3 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600 transition-colors"
+                    disabled={cart.length === 0}
                 >
-                    Clear Cart
+                    Vaciar carrito
                 </button>
                 <button
                     onClick={() => setIsCheckoutOpen(true)}
-                    className="w-full py-3 bg-pink-500 text-white rounded-md font-semibold hover:bg-pink-600 transition-colors"
+                    className="w-full py-3 bg-pink-500 text-white rounded-md font-semibold hover:bg-pink-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    disabled={cart.length === 0 || total <= 0}
                 >
-                    Checkout
+                    Cobrar
                 </button>
             </div>
           </div>

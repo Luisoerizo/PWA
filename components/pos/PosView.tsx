@@ -12,22 +12,38 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (product: Product) 
   const isLowStock = !isOutOfStock && product.stock <= product.lowStockThreshold;
 
   return (
-    <div className={`relative rounded-lg shadow-lg overflow-hidden transition-transform duration-200 hover:scale-105 ${isOutOfStock ? 'bg-gray-300/70' : 'bg-white/70 backdrop-blur-sm'}`}>
-      <img src={product.imageUrl} alt={product.name} className={`w-full h-40 object-cover ${isOutOfStock ? 'opacity-50' : ''}`} />
-      {isLowStock && <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full">Low Stock</span>}
-      {isOutOfStock && <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full">Out of Stock</span>}
-
-      <div className="p-4">
+    <div
+      className={`relative rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 ${isOutOfStock ? 'bg-gray-300/70' : 'bg-white/50 backdrop-blur-md'}
+        sm:w-64 w-full mx-auto my-2 animate-fade-in-up`}
+      style={{ minHeight: 280 }}
+    >
+      <img
+        src={product.imageUrl}
+        alt={product.name}
+        className={`w-full h-40 object-cover ${isOutOfStock ? 'opacity-50' : ''}`}
+        loading="lazy"
+      />
+      {isLowStock && (
+        <span className="absolute top-2 left-2 bg-yellow-400 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full animate-pulse">
+          Pocas unidades
+        </span>
+      )}
+      {isOutOfStock && (
+        <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-full animate-bounce">
+          Sin stock
+        </span>
+      )}
+      <div className="absolute bottom-0 left-0 w-full p-4 bg-white/60 backdrop-blur-md rounded-b-lg flex flex-col gap-1" style={{backdropFilter: 'blur(8px)'}}>
         <h3 className="font-semibold text-md text-gray-800 truncate">{product.name}</h3>
-        <p className="text-gray-500 text-sm">{product.sku}</p>
+        <p className="text-gray-500 text-sm">SKU: {product.sku}</p>
         <div className="flex justify-between items-center mt-3">
           <p className="text-lg font-bold text-pink-600">${product.price.toFixed(2)}</p>
           <button
             onClick={() => onAddToCart(product)}
             disabled={isOutOfStock}
-            className="px-3 py-1 bg-pink-500 text-white rounded-md text-sm font-medium hover:bg-pink-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1 bg-pink-500 text-white rounded-md text-sm font-medium hover:bg-pink-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors focus:ring-2 focus:ring-pink-300 focus:outline-none"
           >
-            Add
+            Agregar
           </button>
         </div>
       </div>
@@ -104,12 +120,14 @@ const PosView: React.FC = () => {
             </div>
           </div>
           <div className="flex-grow overflow-y-auto pr-2">
-            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredProducts.map(product => (
-                <ProductCard key={product.id} product={product} onAddToCart={(p) => {
-                  addToCart(p);
-                  setNotification({ message: `Agregado: ${p.name}`, type: 'success' });
-                }} />
+                <div key={product.id}>
+                  <ProductCard product={product} onAddToCart={(p) => {
+                    addToCart(p);
+                    setNotification({ message: `Agregado: ${p.name}`, type: 'success' });
+                  }} />
+                </div>
               ))}
             </div>
           </div>
