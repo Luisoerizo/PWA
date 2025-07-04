@@ -1,0 +1,7 @@
+{
+  "name": "Boutique POS PWA",
+  "description": "A complete Point of Sale (POS) Progressive Web App for a small clothing boutique, featuring inventory management, a shopping cart, checkout, barcode scanning, and AI-powered product recognition.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
