@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import { useAppContext } from '../../context/AppContext';
 import { TrashIcon, EditIcon } from '../ui/Icons';
 import CheckoutModal from './CheckoutModal';
@@ -59,7 +60,14 @@ const CartItemRow: React.FC<{ item: CartItem }> = ({ item }) => {
   );
 };
 
-const CartView: React.FC = () => {
+interface CartViewProps {
+  onCheckout: () => void;
+  drawerOpen?: boolean;
+  setDrawerOpen?: (open: boolean) => void;
+  isMobile?: boolean;
+}
+
+const CartView: React.FC<CartViewProps> = ({ onCheckout, drawerOpen, setDrawerOpen, isMobile }) => {
   const { cart, clearCart } = useAppContext();
   const [discount, setDiscount] = useState(0);
   const [discountType, setDiscountType] = useState<'PERCENT' | 'FLAT'>('FLAT');
@@ -76,8 +84,97 @@ const CartView: React.FC = () => {
 
   const total = useMemo(() => subtotal - discountAmount, [subtotal, discountAmount]);
   
+  // Mobile: show button to open drawer
+  if (isMobile && drawerOpen && setDrawerOpen) {
+    const drawer = (
+      <div className="fixed inset-0 z-[100] flex">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity animate-fade-in" onClick={() => setDrawerOpen(false)} />
+        <div className="w-full h-full bg-white shadow-2xl flex flex-col animate-slide-in-right">
+          <div className="flex justify-between items-center p-4 border-b">
+            <h2 className="text-xl font-bold text-gray-900">Carrito de compras</h2>
+            <button onClick={() => setDrawerOpen(false)} className="text-gray-500 hover:text-pink-500 text-2xl">&times;</button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            {cart.length === 0 ? (
+              <div className="flex-grow flex items-center justify-center">
+                <p className="text-gray-500">Tu carrito está vacío.</p>
+              </div>
+            ) : (
+              <>
+                <div className="divide-y divide-gray-200 pr-2">
+                  {cart.map(item => (
+                    <CartItemRow key={item.id} item={item} />
+                  ))}
+                </div>
+                {/* ...totales y acciones... */}
+                <div className="mt-4 pt-4 border-t border-gray-200 space-y-3">
+                  <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Descuento</span>
+                      <div className="flex items-center gap-2">
+                          <input 
+                              type="number" 
+                              value={discount}
+                              onChange={(e) => setDiscount(Math.max(0, parseFloat(e.target.value) || 0))}
+                              className="w-24 p-1 border border-gray-300 rounded-md bg-white/80"
+                          />
+                          <select value={discountType} onChange={(e) => setDiscountType(e.target.value as 'PERCENT' | 'FLAT')} className="p-1 border border-gray-300 rounded-md bg-white/80">
+                              <option value="FLAT">$</option>
+                              <option value="PERCENT">%</option>
+                          </select>
+                      </div>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>Descuento</span>
+                    <span className="text-green-600">-${discountAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-xl font-bold text-gray-900">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                  </div>
+                  <div className="flex gap-2 pt-2">
+                      <button
+                          onClick={clearCart}
+                          className="w-full py-3 bg-yellow-500 text-white rounded-md font-semibold hover:bg-yellow-600 transition-colors"
+                          disabled={cart.length === 0}
+                      >
+                          Vaciar carrito
+                      </button>
+                      <button
+                          onClick={() => {
+                            setIsCheckoutOpen(true);
+                            if (onCheckout) onCheckout();
+                          }}
+                          className="w-full py-3 bg-pink-500 text-white rounded-md font-semibold hover:bg-pink-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                          disabled={cart.length === 0 || total <= 0}
+                      >
+                          Cobrar
+                      </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+          <CheckoutModal
+            isOpen={isCheckoutOpen}
+            onClose={() => setIsCheckoutOpen(false)}
+            subtotal={subtotal}
+            discount={discountAmount}
+            total={total}
+          />
+        </div>
+      </div>
+    );
+    const portalRoot = document.getElementById('root') || document.body;
+    return ReactDOM.createPortal(drawer, portalRoot);
+  }
+
+  // Desktop: panel lateral
   return (
-    <div className="h-full flex flex-col p-4 bg-transparent">
+    <div className="h-full flex flex-col p-4 bg-transparent animate-fade-in">
       <h2 className="text-xl font-bold mb-4 text-gray-900 border-b pb-2 border-pink-200">Carrito de compras</h2>
       {cart.length === 0 ? (
         <div className="flex-grow flex items-center justify-center">
@@ -128,7 +225,10 @@ const CartView: React.FC = () => {
                     Vaciar carrito
                 </button>
                 <button
-                    onClick={() => setIsCheckoutOpen(true)}
+                    onClick={() => {
+                      setIsCheckoutOpen(true);
+                      if (onCheckout) onCheckout();
+                    }}
                     className="w-full py-3 bg-pink-500 text-white rounded-md font-semibold hover:bg-pink-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                     disabled={cart.length === 0 || total <= 0}
                 >

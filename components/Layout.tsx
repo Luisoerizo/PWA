@@ -29,43 +29,46 @@ const NavItem: React.FC<{
 };
 
 const Layout: React.FC<LayoutProps> = ({ children, currentView, setCurrentView }) => {
+  // Solo mostrar navegación en main, inventory y orders
+  const showNav = currentView === 'main' || currentView === 'inventory' || currentView === 'orders';
   return (
     <div className="min-h-screen flex flex-col">
-      <nav className="bg-white shadow-md border-b border-gray-200">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <h1 className="text-pink-500 font-bold text-xl">Boutique POS</h1>
+      {showNav && (
+        <nav className="bg-white shadow-md border-b border-gray-200">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <h1 className="text-pink-500 font-bold text-xl">Boutique POS</h1>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <NavItem
+                  label="Venta"
+                  view="main"
+                  currentView={currentView}
+                  setCurrentView={setCurrentView}
+                  icon={<PosIcon className="h-6 w-6" />}
+                />
+                <NavItem
+                  label="Inventario"
+                  view="inventory"
+                  currentView={currentView}
+                  setCurrentView={setCurrentView}
+                  icon={<InventoryIcon className="h-6 w-6" />}
+                />
+                <NavItem
+                  label="Pedidos"
+                  view="orders"
+                  currentView={currentView}
+                  setCurrentView={setCurrentView}
+                  icon={<OrdersIcon className="h-6 w-6" />}
+                />
               </div>
             </div>
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              <NavItem
-                label="POS"
-                view="pos"
-                currentView={currentView}
-                setCurrentView={setCurrentView}
-                icon={<PosIcon className="h-6 w-6" />}
-              />
-              <NavItem
-                label="Inventory"
-                view="inventory"
-                currentView={currentView}
-                setCurrentView={setCurrentView}
-                icon={<InventoryIcon className="h-6 w-6" />}
-              />
-              <NavItem
-                label="Orders"
-                view="orders"
-                currentView={currentView}
-                setCurrentView={setCurrentView}
-                icon={<OrdersIcon className="h-6 w-6" />}
-              />
-            </div>
           </div>
-        </div>
-      </nav>
-
+        </nav>
+      )}
       <main className="flex-grow">
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           {children}

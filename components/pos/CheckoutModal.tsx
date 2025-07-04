@@ -6,40 +6,47 @@ import { useAppContext } from '../../context/AppContext';
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  subtotal: number;
-  discount: number;
-  total: number;
+  onSuccess?: (change: number) => void;
+  subtotal?: number;
+  discount?: number;
+  total?: number;
 }
 
-const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal, discount, total }) => {
+const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, onSuccess, subtotal, discount, total }) => {
   const { cart, addOrder, clearCart } = useAppContext();
   const [amountPaid, setAmountPaid] = useState<number | string>('');
   const [isCompleted, setIsCompleted] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
 
+  // fallback values for direct usage from App.tsx
+  const _subtotal = subtotal ?? cart.reduce((acc, item) => acc + item.salePrice * item.quantity, 0);
+  const _discount = discount ?? 0;
+  const _total = total ?? (_subtotal - _discount);
+
   const change = useMemo(() => {
-    const paid = typeof amountPaid === 'number' ? amountPaid : parseFloat(amountPaid);
-    if (!isNaN(paid) && paid >= total) {
-      return paid - total;
+    const paid = typeof amountPaid === 'number' ? amountPaid : parseFloat(amountPaid as string);
+    if (!isNaN(paid) && paid >= _total) {
+      return paid - _total;
     }
     return 0;
-  }, [amountPaid, total]);
+  }, [amountPaid, _total]);
 
   const handleCompleteSale = () => {
-    if (typeof amountPaid !== 'number' && parseFloat(amountPaid as string) < total) {
+    if (typeof amountPaid !== 'number' && parseFloat(amountPaid as string) < _total) {
       setNotification({ message: 'El monto pagado es menor al total.', type: 'error' });
       return;
     }
     addOrder({
       items: cart,
-      subtotal,
-      discount,
-      total,
+      subtotal: _subtotal,
+      discount: _discount,
+      total: _total,
       amountPaid: typeof amountPaid === 'number' ? amountPaid : parseFloat(amountPaid as string),
       change
     });
     setNotification({ message: '¡Venta completada con éxito!', type: 'success' });
     setIsCompleted(true);
+    if (onSuccess) onSuccess(change);
   };
   
   const handleCloseAndReset = () => {
@@ -50,7 +57,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
 
   return (
     <Modal isOpen={isOpen} onClose={handleCloseAndReset} title={isCompleted ? "¡Venta completada!" : "Cobrar"}>
-      <div className="space-y-4">
+      <div className="space-y-4 animate-fade-in">
         {notification && (
           <Notification
             message={notification.message}
@@ -85,11 +92,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                   <span>${(item.salePrice * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="border-t pt-2 mt-2 border-gray-200">
-                <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>${subtotal.toFixed(2)}</span></div>
-                <div className="flex justify-between text-sm text-green-600"><span>Descuento</span><span>-${discount.toFixed(2)}</span></div>
-                <div className="flex justify-between font-bold text-lg text-gray-900"><span>Total</span><span>${total.toFixed(2)}</span></div>
-              </div>
+                <div className="border-t pt-2 mt-2 border-gray-200">
+                  <div className="flex justify-between text-sm text-gray-600"><span>Subtotal</span><span>${_subtotal.toFixed(2)}</span></div>
+                  <div className="flex justify-between text-sm text-green-600"><span>Descuento</span><span>-${_discount.toFixed(2)}</span></div>
+                  <div className="flex justify-between font-bold text-lg text-gray-900"><span>Total</span><span>${_total.toFixed(2)}</span></div>
+                </div>
             </div>
 
             <div className="space-y-2">
@@ -99,7 +106,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                 id="amountPaid"
                 value={amountPaid}
                 onChange={(e) => setAmountPaid(e.target.value)}
-                placeholder={total.toFixed(2)}
+                placeholder={_total.toFixed(2)}
                 className="w-full p-3 text-2xl border border-gray-300 rounded-md focus:ring-pink-500 focus:border-pink-500"
                 autoFocus
               />
@@ -111,7 +118,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
 
             <button
               onClick={handleCompleteSale}
-              disabled={parseFloat(String(amountPaid)) < total}
+              disabled={parseFloat(String(amountPaid)) < _total}
               className="w-full py-3 mt-4 bg-pink-500 text-white rounded-md font-semibold hover:bg-pink-600 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               Completar venta

@@ -27,4 +27,4 @@ export interface Order {
   change: number;
 }
 
-export type View = 'pos' | 'inventory' | 'orders';
+export type View = 'main' | 'checkout' | 'success' | 'inventory' | 'orders';

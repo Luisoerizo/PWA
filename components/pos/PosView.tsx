@@ -12,8 +12,13 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (product: Product) 
 
   return (
     <div
-      className={`relative rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105 ${isOutOfStock ? 'bg-gray-300/70' : 'bg-white/50 backdrop-blur-md'}
-        sm:w-64 w-full mx-auto my-2 animate-fade-in-up`}
+      className={[
+        'relative rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:scale-105',
+        isOutOfStock ? 'bg-gray-300/70' : '',
+        'sm:w-64 w-full mx-auto',
+        isOutOfStock ? 'my-2' : 'my-1',
+        'animate-fade-in-up'
+      ].join(' ')}
       style={{ minHeight: 280 }}
     >
       <img
@@ -32,11 +37,11 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (product: Product) 
           Sin stock
         </span>
       )}
-      <div className="absolute bottom-0 left-0 w-full p-4 bg-white/60 backdrop-blur-md rounded-b-lg flex flex-col gap-1" style={{backdropFilter: 'blur(8px)'}}>
-        <h3 className="font-semibold text-md text-gray-800 truncate">{product.name}</h3>
-        <p className="text-gray-500 text-sm">SKU: {product.sku}</p>
+      <div className="absolute bottom-0 left-0 w-full p-4 bg-black/60 rounded-b-lg flex flex-col gap-1" style={{backdropFilter: 'blur(4px)'}}>
+        <h3 className="font-semibold text-md text-white truncate">{product.name}</h3>
+        <p className="text-gray-200 text-sm">SKU: {product.sku}</p>
         <div className="flex justify-between items-center mt-3">
-          <p className="text-lg font-bold text-pink-600">${product.price.toFixed(2)}</p>
+          <p className="text-lg font-bold text-pink-200">${product.price.toFixed(2)}</p>
           <button
             onClick={() => onAddToCart(product)}
             disabled={isOutOfStock}
@@ -50,20 +55,27 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (product: Product) 
   );
 };
 
-const PosView: React.FC = () => {
-  const { products, addToCart } = useAppContext();
+interface PosViewProps {
+  onCheckout: () => void;
+}
+
+const PosView: React.FC<PosViewProps> = ({ onCheckout }) => {
+  const { products, addToCart, cart } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
-  // const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-
-
-
 
   return (
     <>
@@ -74,9 +86,18 @@ const PosView: React.FC = () => {
           onClose={() => setNotification(null)}
         />
       )}
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-10rem)]">
-
-
+      {/* Botón flotante de carrito en móvil */}
+      {isMobile && !drawerOpen && (
+        <button
+          className="fixed bottom-6 right-6 z-50 bg-pink-500 text-white rounded-full shadow-lg p-4 flex items-center gap-2 animate-bounce-in"
+          style={{ boxShadow: '0 4px 24px 0 rgba(249, 168, 212, 0.4)' }}
+          onClick={() => setDrawerOpen(true)}
+        >
+          <span className="font-bold">Carrito</span>
+          <span className="bg-white text-pink-500 rounded-full px-2 py-1 text-xs font-bold">{cart.reduce((acc, item) => acc + item.quantity, 0)}</span>
+        </button>
+      )}
+      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-10rem)] animate-fade-in">
         {/* Product Grid */}
         <div className="lg:w-2/3 flex flex-col">
           <div className="mb-4 flex flex-col sm:flex-row gap-4">
@@ -87,14 +108,6 @@ const PosView: React.FC = () => {
               onChange={e => setSearchTerm(e.target.value)}
               className="flex-grow p-2 border border-gray-300 rounded-md bg-white/50 focus:ring-pink-500 focus:border-pink-500"
             />
-            {/*
-            <div className="flex gap-2">
-              <button onClick={() => setShowBarcodeScanner(true)} className="flex-1 flex items-center justify-center gap-2 p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
-                <BarcodeIcon className="h-5 w-5" />
-                <span className="hidden sm:inline">Scan Barcode</span>
-              </button>
-            </div>
-            */}
           </div>
           <div className="flex-grow overflow-y-auto pr-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-10 gap-y-8 px-2 md:px-4 xl:px-8">
@@ -109,10 +122,9 @@ const PosView: React.FC = () => {
             </div>
           </div>
         </div>
-
         {/* Cart View */}
         <div className="lg:w-1/3 flex flex-col bg-white/50 backdrop-blur-md rounded-lg shadow-2xl">
-          <CartView />
+          <CartView onCheckout={onCheckout} drawerOpen={drawerOpen} setDrawerOpen={setDrawerOpen} isMobile={isMobile} />
         </div>
       </div>
     </>

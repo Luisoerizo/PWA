@@ -6,12 +6,11 @@ interface ModalProps {
   onClose: () => void;
   title: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 }
 
 import { useRef, useEffect } from 'react';
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isOpen) return;
@@ -24,19 +23,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
 
   if (!isOpen) return null;
 
-  const sizeClasses = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    '2xl': 'max-w-2xl',
-    '3xl': 'max-w-3xl',
-    '4xl': 'max-w-4xl',
-  };
+
 
   return (
     <div
-      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4 animate-fade-in"
+      className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-2 sm:p-4 animate-fade-in"
       onClick={e => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -45,16 +36,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
     >
       <div
         ref={modalRef}
-        className={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} flex flex-col max-h-full transform transition-all duration-300 scale-95 animate-modal-in`}
+        className={"bg-white rounded-lg shadow-xl w-full max-w-md sm:max-w-lg md:max-w-xl lg:max-w-2xl xl:max-w-3xl flex flex-col max-h-[90vh] transform transition-all duration-300 scale-95 animate-modal-in"}
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex justify-between items-center p-4 border-b border-gray-200">
+        <div className="flex justify-between items-center p-3 sm:p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600" aria-label="Cerrar modal">
             <XIcon className="h-6 w-6" />
           </button>
         </div>
-        <div className="p-6 overflow-y-auto">
+        <div className="p-3 sm:p-6 overflow-y-auto">
           {children}
         </div>
       </div>
