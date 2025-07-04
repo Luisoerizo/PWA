@@ -144,6 +144,7 @@ const CartView: React.FC = () => {
         subtotal={subtotal}
         discount={discountAmount}
         total={total}
+        // No limpiar el carrito aquí, solo cerrar el modal
       />
     </div>
   );

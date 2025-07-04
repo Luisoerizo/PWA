@@ -3,9 +3,8 @@ import Notification, { NotificationType } from '../ui/Notification';
 import { useAppContext } from '../../context/AppContext';
 import { Product } from '../../types';
 import CartView from './CartView';
-import { BarcodeIcon, AiIcon } from '../ui/Icons';
-import BarcodeScanner from '../scanner/BarcodeScanner';
-import AiScanner from '../scanner/AiScanner';
+import { BarcodeIcon } from '../ui/Icons';
+// import BarcodeScanner from '../scanner/BarcodeScanner';
 
 const ProductCard: React.FC<{ product: Product; onAddToCart: (product: Product) => void }> = ({ product, onAddToCart }) => {
   const isOutOfStock = product.stock <= 0;
@@ -54,8 +53,7 @@ const ProductCard: React.FC<{ product: Product; onAddToCart: (product: Product) 
 const PosView: React.FC = () => {
   const { products, addToCart } = useAppContext();
   const [searchTerm, setSearchTerm] = useState('');
-  const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
-  const [showAiScanner, setShowAiScanner] = useState(false);
+  // const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
 
   const filteredProducts = products.filter(p =>
@@ -63,27 +61,9 @@ const PosView: React.FC = () => {
     p.sku.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleBarcodeScanned = (sku: string) => {
-    const product = products.find(p => p.sku === sku);
-    if (product) {
-      addToCart(product);
-      setNotification({ message: `Agregado: ${product.name}`, type: 'success' });
-    } else {
-      setNotification({ message: `Producto con SKU ${sku} no encontrado.`, type: 'error' });
-    }
-    setShowBarcodeScanner(false);
-  };
 
-  const handleAiProductIdentified = (sku: string) => {
-    const product = products.find(p => p.sku === sku);
-    if(product) {
-      addToCart(product);
-      setNotification({ message: `AI identificó y agregó: ${product.name}`, type: 'success' });
-    } else {
-      setNotification({ message: `AI identificó SKU ${sku}, pero no está en inventario.`, type: 'error' });
-    }
-    setShowAiScanner(false);
-  };
+
+
 
   return (
     <>
@@ -95,8 +75,7 @@ const PosView: React.FC = () => {
         />
       )}
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-10rem)]">
-        {showBarcodeScanner && <BarcodeScanner onScanSuccess={handleBarcodeScanned} onStop={() => setShowBarcodeScanner(false)} />}
-        {showAiScanner && <AiScanner onIdentified={handleAiProductIdentified} onStop={() => setShowAiScanner(false)} />}
+
 
         {/* Product Grid */}
         <div className="lg:w-2/3 flex flex-col">
@@ -108,21 +87,19 @@ const PosView: React.FC = () => {
               onChange={e => setSearchTerm(e.target.value)}
               className="flex-grow p-2 border border-gray-300 rounded-md bg-white/50 focus:ring-pink-500 focus:border-pink-500"
             />
+            {/*
             <div className="flex gap-2">
               <button onClick={() => setShowBarcodeScanner(true)} className="flex-1 flex items-center justify-center gap-2 p-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors">
                 <BarcodeIcon className="h-5 w-5" />
                 <span className="hidden sm:inline">Scan Barcode</span>
               </button>
-              <button onClick={() => setShowAiScanner(true)} className="flex-1 flex items-center justify-center gap-2 p-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 transition-colors">
-                <AiIcon className="h-5 w-5" />
-                <span className="hidden sm:inline">AI Identify</span>
-              </button>
             </div>
+            */}
           </div>
           <div className="flex-grow overflow-y-auto pr-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-10 gap-y-8 px-2 md:px-4 xl:px-8">
               {filteredProducts.map(product => (
-                <div key={product.id}>
+                <div key={product.id} className="flex">
                   <ProductCard product={product} onAddToCart={(p) => {
                     addToCart(p);
                     setNotification({ message: `Agregado: ${p.name}`, type: 'success' });

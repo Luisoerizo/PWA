@@ -37,13 +37,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 
   return (
     <div
       className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4 animate-fade-in"
-      onClick={onClose}
+      onClick={e => {
+        if (e.target === e.currentTarget) onClose();
+      }}
       aria-modal="true"
       role="dialog"
     >
       <div
         ref={modalRef}
-        className={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} flex flex-col max-h-full transform transition-all duration-300 scale-95 opacity-0 animate-modal-in`}
+        className={`bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} flex flex-col max-h-full transform transition-all duration-300 scale-95 animate-modal-in`}
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center p-4 border-b border-gray-200">
