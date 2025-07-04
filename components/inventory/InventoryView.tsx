@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Notification, { NotificationType } from '../ui/Notification';
 import { useAppContext } from '../../context/AppContext';
 import { Product } from '../../types';
 import { EditIcon, TrashIcon } from '../ui/Icons';
@@ -11,6 +12,7 @@ const InventoryView: React.FC = () => {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
   const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
+  const [notification, setNotification] = useState<{ message: string; type: NotificationType } | null>(null);
 
   const openAddForm = () => {
     setEditingProduct(undefined);
@@ -30,6 +32,7 @@ const InventoryView: React.FC = () => {
   const handleConfirmDelete = () => {
     if (productToDelete) {
       deleteProduct(productToDelete.id);
+      setNotification({ message: `Producto eliminado: ${productToDelete.name}`, type: 'success' });
     }
     setIsConfirmOpen(false);
     setProductToDelete(null);
@@ -37,6 +40,13 @@ const InventoryView: React.FC = () => {
 
   return (
     <>
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Inventory Management</h1>
         <button
